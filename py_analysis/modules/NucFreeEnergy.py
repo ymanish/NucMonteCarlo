@@ -90,7 +90,7 @@ class NucleosomeBreath:
 
 
 
-        mid_array = self.select_phosphate_bind_sites(left=0, right=13)
+        mid_array = self.select_phosphate_bind_sites(left, right)
         F_dict = nucleosome_free_energy(gs, stiff, mid_array, self.nuctriads, use_correction=True)
 
 

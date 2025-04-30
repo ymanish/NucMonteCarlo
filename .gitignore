@@ -22,6 +22,7 @@ qc_reports/
 
 # Ignore Jupyter Notebook checkpoints
 **.ipynb_checkpoints
+/notebooks/*.csv
 # Ignore Python virtual environments
 venv/
 .vscode/
