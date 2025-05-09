@@ -43,16 +43,37 @@ class NucleosomeBreath:
         self.cgnaplus = cgnaplus
 
 
-    def calculate_free_energy_soft(self, seq601:str, left:int, right:int, id:Optional[str]=None, subid:Optional[str]=None, 
-                                    Kentries:np.ndarray=np.array([1,1,1,10,10,10])*1)-> FreeEnergyResult:
+    def calculate_free_energy_soft(self, seq601:str, left:int, right:int, 
+                                   id:Optional[str]=None, subid:Optional[str]=None,
+                                     kresc_factor:float = 1, style:str="b_index")-> FreeEnergyResult:
         
         if self.cgnaplus:
             gs,stiff = cgnaplus_bps_params(seq601,group_split=True)
         else:
             stiff, gs = self.genstiff_nuc.gen_params(seq601, use_group=True)
+        
+        
+        if style == "b_index":
+            ## this converts the bound index to how many open phosphate sites required to be there
+            ## Example: left=1, right=11, means l_open=2, r_open=4 so you need 2 open phosphate sites on left and 4 on right
+            l_open = 2*left
+            r_open  = 28-(2*right)-2
 
-        l_open = 2*left
-        r_open  = 28-(2*right)-2
+        elif style == "ph_index":
+            ## Same as the bi style but directly at the phosphate sites level
+            ## Example: left=0, right=27, means l_open=0, r_open=0
+            ## Example: left=1, right=26, means l_open=1, r_open=1
+            l_open = left
+            r_open  = 28-(right)-1
+           
+        elif style == "open_sites":
+            ## Here, we directly provide the number of open phosphate sites from left and right
+            ## Example: left=0, right=27, means l_open=0, r_open=27
+            l_open = left
+            r_open  = right
+
+        else:
+            raise ValueError("Invalid style. Use 'b_index' or 'open_sites' or 'ph_index'.")
         
         K_resc = np.load(self.fn)
 
@@ -70,7 +91,7 @@ class NucleosomeBreath:
             gs,
             stiff,    
             nuc_mu0,
-            K_resc,
+            K_resc*kresc_factor,
             left_open=l_open,
             right_open=r_open,
             use_correction=True,
@@ -117,4 +138,8 @@ class NucleosomeBreath:
     
 
 if __name__ == "__main__":
-    nucleosomebreath  = NucleosomeBreath(nuc_method=NUC_PARAM_TYPE, hang_dna_method=HANG_PARAM_TYPE, hang_stiff=True)
+    
+    # Example usage
+    nuc_breath = NucleosomeBreath(nuc_method='crystal', hang_dna_method='md', hang_stiff=False, cgnaplus=False)
+    result = nuc_breath.calculate_free_energy_soft(seq601="ACGTACGTACGTACGTACGTACGTACGT", left=1, right=2)
+    print(result)

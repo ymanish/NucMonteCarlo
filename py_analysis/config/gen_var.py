@@ -13,8 +13,9 @@ BIND_POINTS = [4, 9] ## tetramer positions
 # KENTRIES= np.array([1,1,1,10,10,10])*0.01
 
 select_min_F = False
-HARD_CONS = False
 
+HARD_CONS = False
+# KRESCFACTOR = 1.0
 
 ##### TI PARAMETERS #####
 
@@ -63,6 +64,7 @@ class ddGDataSaveParams:
     tetramer_length: int
     pad_char: str
     constraint: str
+    kresc_factor: float
 
      # Class-level configuration
     ABBREVIATIONS: ClassVar[Dict[str, str]] = field(
@@ -73,7 +75,8 @@ class ddGDataSaveParams:
             'tet': 't',
             'pad': 'p',
             'scatter': 'sct',
-            '_': '-'  # Separator
+            '_': '-',  # Separator, 
+            'kfactor': 'kf',
         },
         repr=False
     )
@@ -87,7 +90,8 @@ class ddGDataSaveParams:
                 f"freedna_{self.hangdna_type}_"
                 f"constraint_{self.constraint}_"
                 f"tet_{self.tetramer_length}_"
-                f"pad_{self.pad_char}"]
+                f"pad_{self.pad_char}_"
+                f"kfactor_{self.kresc_factor}"]
                 
             
         else:
@@ -97,7 +101,8 @@ class ddGDataSaveParams:
                 f"{self.ABBREVIATIONS['nuc']}{self.nuc_type}",
                 f"{self.ABBREVIATIONS['freedna']}{self.hangdna_type}",
                 f"{self.ABBREVIATIONS['tet']}{self.tetramer_length}",
-                f"{self.ABBREVIATIONS['pad']}{self.pad_char}"
+                f"{self.ABBREVIATIONS['pad']}{self.pad_char}",
+                f"{self.ABBREVIATIONS['kfactor']}{self.kresc_factor}",
                 ]
         return "_".join(parts)
 

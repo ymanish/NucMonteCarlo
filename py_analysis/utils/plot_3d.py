@@ -78,7 +78,7 @@ def plot_3d_filled_volume(
         df_id = df[df[id_col] == id_val]
         pivot = df_id.pivot(index=x_col, columns=y_col, values=z_col)
         X, Y = np.meshgrid(pivot.columns.values, pivot.index.values)
-        Z = pivot.values
+        Z = pivot.values 
 
         # triangulate for Mesh3d
         pts = np.column_stack([X.flatten(), Y.flatten()])

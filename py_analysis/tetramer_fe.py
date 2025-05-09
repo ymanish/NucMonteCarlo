@@ -50,7 +50,7 @@ def process_sequence_padding_and_sliding(seq:str,
 
 
 
-def energy_per_long_sequence(key, records, nucmethod:str, hard:bool=False)-> Tuple[str, List[FreeEnergyResult]]:
+def energy_per_long_sequence(key, records, nucmethod:str, hard:bool=False, k_factor:float=1.0)-> Tuple[str, List[FreeEnergyResult]]:
     nucleosomebreath = NucleosomeBreath(nuc_method=nucmethod)
     tetramer_loc = BIND_POINTS
     results:List[FreeEnergyResult] = []
@@ -62,7 +62,7 @@ def energy_per_long_sequence(key, records, nucmethod:str, hard:bool=False)-> Tup
 
         else:
             free_energy = nucleosomebreath.calculate_free_energy_soft(seq601=rec.sequence, 
-                                                                  left=tetramer_loc[0], right=tetramer_loc[1], id=key, subid=rec.subid)
+                                                                  left=tetramer_loc[0], right=tetramer_loc[1], id=key, subid=rec.subid,  kresc_factor=k_factor)
         results.append(free_energy)
 
     return key, results
@@ -75,7 +75,7 @@ if __name__ == "__main__":
   
     start = time.perf_counter()
 
-
+    KRESCFACTOR = float(sys.argv[1])
 
     processed_sequences = {}
     for name, seq in sequence_dict.items():
@@ -91,7 +91,11 @@ if __name__ == "__main__":
 
     results_all = dict()
     with concurrent.futures.ProcessPoolExecutor(max_workers=11) as executor:
-        futures = [executor.submit(energy_per_long_sequence, rec, processed_sequences[rec], NUC_PARAM_TYPE, HARD_CONS) for rec in processed_sequences.keys()]
+        futures = [executor.submit(energy_per_long_sequence, key=rec, 
+                                                            records=processed_sequences[rec], 
+                                                            nucmethod=NUC_PARAM_TYPE, 
+                                                            hard=HARD_CONS, 
+                                                            k_factor=KRESCFACTOR) for rec in processed_sequences.keys()]
         total = len(futures)
 
         for future in tqdm(concurrent.futures.as_completed(futures), total=total, desc="Processing sequences"):
@@ -110,7 +114,8 @@ if __name__ == "__main__":
                         hangdna_type=HANG_PARAM_TYPE,
                         tetramer_length=TETRAMER_LENGTH,
                         pad_char=PAD_CHAR,
-                        constraint="hc"
+                        constraint="hc", 
+                        kresc_factor=KRESCFACTOR
                     )
        
     else:
@@ -119,7 +124,9 @@ if __name__ == "__main__":
                 hangdna_type=HANG_PARAM_TYPE,
                 tetramer_length=TETRAMER_LENGTH,
                 pad_char=PAD_CHAR,
-                constraint="sc"
+                constraint="sc", 
+                kresc_factor=KRESCFACTOR
+
             )
 
     pkl_filepath = RESULTS_DIR / "pklfiles" / f"{file_cfg.ddG_filename(long_name=False)}.pkl"
