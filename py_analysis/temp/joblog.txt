@@ -1,7 +1,0 @@
-Seq	Host	Starttime	JobRuntime	Send	Receive	Exitval	Signal	Command
-2	:	1746792656.468	   375.391	0	2344	0	0	conda run -n nucleosome && /home/pol_schiessel/maya620d/anaconda3/envs/nucleosome/bin/python nucbreathstatesfe_varying_K.py 0.5
-1	:	1746792656.465	   375.845	0	2344	0	0	conda run -n nucleosome && /home/pol_schiessel/maya620d/anaconda3/envs/nucleosome/bin/python nucbreathstatesfe_varying_K.py 0.1
-3	:	1746793031.867	   378.279	0	2344	0	0	conda run -n nucleosome && /home/pol_schiessel/maya620d/anaconda3/envs/nucleosome/bin/python nucbreathstatesfe_varying_K.py 1.0
-4	:	1746793032.317	   378.992	0	2344	0	0	conda run -n nucleosome && /home/pol_schiessel/maya620d/anaconda3/envs/nucleosome/bin/python nucbreathstatesfe_varying_K.py 2.0
-5	:	1746793410.154	   375.415	0	2344	0	0	conda run -n nucleosome && /home/pol_schiessel/maya620d/anaconda3/envs/nucleosome/bin/python nucbreathstatesfe_varying_K.py 5.0
-6	:	1746793411.314	   376.776	0	2345	0	0	conda run -n nucleosome && /home/pol_schiessel/maya620d/anaconda3/envs/nucleosome/bin/python nucbreathstatesfe_varying_K.py 10.0

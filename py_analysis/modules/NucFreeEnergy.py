@@ -81,11 +81,6 @@ class NucleosomeBreath:
         nuc_mu0 = calculate_midstep_triads(triad_ids = self.select_phosphate_bind_sites(), 
                                            nucleosome_triads = self.nuctriads)
         
-       
-
-        # diags = np.concatenate([Kentries]*len(nuc_mu0))
-        # K = np.diag(diags)
-
 
         F_dict = binding_model_free_energy(
             gs,
@@ -96,6 +91,22 @@ class NucleosomeBreath:
             right_open=r_open,
             use_correction=True,
         )
+
+
+        # Kentries = [1,1,1,10,10,10]
+        # diags = np.concatenate([Kentries]*len(nuc_mu0))
+        # K = np.diag(diags)
+
+        # F_dict = binding_model_free_energy(
+        #     gs,
+        #     stiff,    
+        #     nuc_mu0,
+        #     K,
+        #     left_open=l_open,
+        #     right_open=r_open,
+        #     use_correction=True,
+        # )
+
 
 
         F601 = F_dict['F']
