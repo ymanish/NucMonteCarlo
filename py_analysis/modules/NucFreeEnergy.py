@@ -31,7 +31,7 @@ class NucleosomeBreath:
         print(f"Using hang DNA method: {hang_dna_method}")
         print(f"Using hang stiffness: {hang_stiff}")
 
-
+        
         self.genstiff_nuc = GenStiffness(method=nuc_method)
         if hang_stiff:
             self.genstiff_hang = GenStiffness(method=hang_dna_method)
@@ -54,12 +54,16 @@ class NucleosomeBreath:
         
         
         if style == "b_index":
+            ## Inputs are bound‐site indices (0–13) 
+            ## Each index covers two phosphate positions:
+            ## bound site i ↔ phosphates (2·i, 2·i+1).
             ## this converts the bound index to how many open phosphate sites required to be there
             ## Example: left=1, right=11, means l_open=2, r_open=4 so you need 2 open phosphate sites on left and 4 on right
             l_open = 2*left
             r_open  = 28-(2*right)-2
 
         elif style == "ph_index":
+            ## Inputs are phosphate‐site indices directly (0–27).
             ## Same as the bi style but directly at the phosphate sites level
             ## Example: left=0, right=27, means l_open=0, r_open=0
             ## Example: left=1, right=26, means l_open=1, r_open=1
@@ -67,7 +71,8 @@ class NucleosomeBreath:
             r_open  = 28-(right)-1
            
         elif style == "open_sites":
-            ## Here, we directly provide the number of open phosphate sites from left and right
+            ## Inputs already specify exactly how many phosphates are open
+            ## on each side—no conversion needed.
             ## Example: left=0, right=27, means l_open=0, r_open=27
             l_open = left
             r_open  = right

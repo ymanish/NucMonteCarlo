@@ -2,7 +2,8 @@ from py_analysis.modules.NucFreeEnergy import NucleosomeBreath
 
 import numba as nb
 import numpy as np
-from py_analysis.config.gen_var import TI_PARAMS, DATA_DIR, RESULTS_DIR
+from py_analysis.config.gen_var import TI_PARAMS
+from py_analysis.config.io_path import DATA_DIR, RESULTS_DIR
 import time 
 import concurrent.futures
 from tqdm import tqdm

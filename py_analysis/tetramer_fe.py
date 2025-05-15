@@ -17,6 +17,7 @@ import pickle
 from py_analysis.config.custom_types import ProcessedSequence, FreeEnergyResult
 from py_analysis.config.seq_var import *
 from py_analysis.config.gen_var import *
+from py_analysis.config.io_path import ddGDataSaveParams, RESULTS_DIR
 
 def process_sequence_padding_and_sliding(seq:str, 
                                          seq_id:str, 

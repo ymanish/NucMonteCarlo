@@ -1,0 +1,19 @@
+name: nucleosome
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy
+  - numba
+  - pandas
+  - matplotlib
+  - seaborn
+  - scipy
+  - brokenaxes
+  - tqdm
+  - scikit-learn
+  - statsmodels
+  - pip:
+      - pipdeptree
