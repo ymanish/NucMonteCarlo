@@ -18,7 +18,7 @@ NUC_STATE_PATH = nucfree_energy / "methods" / "State" / "Nucleosome.state"
 if not NUC_STATE_PATH.exists():
     raise FileNotFoundError(f"State file missing: {NUC_STATE_PATH}")
 
-K_POSRESC_PATH = nucfree_energy / "MDParams" / "nuc_K_posresc.npy"
+K_POSRESC_PATH = nucfree_energy / "MDParams" / "nuc_K_posresc_sym.npy"
 if not K_POSRESC_PATH.exists():
     raise FileNotFoundError(f"Parameter file missing: {K_POSRESC_PATH}")
 

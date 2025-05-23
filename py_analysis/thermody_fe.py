@@ -13,18 +13,27 @@ from typing import List, Optional
 import sys
 from py_analysis.config.custom_types import FreeEnergyResult
 
-def process_batch(batch:List[dict], method_nuc:str)-> List[FreeEnergyResult]:
+def process_batch(batch:List[dict], method_nuc:str, hard:bool=False)-> List[FreeEnergyResult]:
     
     nuc_breath = NucleosomeBreath(nuc_method=method_nuc)
     results:List[FreeEnergyResult]=[]
 
+    if hard:
+        print("Using hard method")
+        compute_energy = lambda subseq, seq_id: nuc_breath.calculate_free_energy_hard(seq147=subseq, left=0, right=13, id=seq_id)
+    else:
+        print("Using soft method")
+        compute_energy = lambda subseq, seq_id: nuc_breath.calculate_free_energy_soft(seq601=subseq, left=0, right=13, id=seq_id)
+
     # print(batch)
-    for key,value in batch.items():
-        # print("Processing sequence:", key, value)
-        id = key
-        subseq= value
-        # F, F_entropy, E, F_free, F_diff = nuc_breath.calculate_free_energy(seq601=subseq, left_open=0, right_open=0)
-        res = nuc_breath.calculate_free_energy_soft(seq601=subseq, left=0, right=13, id=id)
+    for key,subseq in batch.items():
+        # print("Processing sequence:", key, subseq)
+
+        # if hard:
+        #     res = nuc_breath.calculate_free_energy_hard(seq147=subseq, left=0, right=13, id=id)
+        # else:
+        #     res = nuc_breath.calculate_free_energy_soft(seq601=subseq, left=0, right=13, id=id)
+        res = compute_energy(subseq = subseq, seq_id = key)
         results.append(res)
     return results
 
@@ -36,9 +45,13 @@ def batch_dict(data: dict, batch_size: int=10) -> List[dict]:
 
 
 ## process a reference sequence seqA 
-def process_ref_seq(seqA:str, method_nuc, left:int=0, right:int=13, id:Optional[str]=None, subid:Optional[str]=None)-> List[FreeEnergyResult]:
+def process_ref_seq(seqA:str, method_nuc, left:int=0, right:int=13, id:Optional[str]=None, subid:Optional[str]=None, hard:bool=False)-> List[FreeEnergyResult]:
     nuc_breath = NucleosomeBreath(nuc_method=method_nuc)
-    free_energy = nuc_breath.calculate_free_energy_soft(seq601=seqA, left=left, right=right, id=id, subid=subid)
+
+    if hard:
+        free_energy = nuc_breath.calculate_free_energy_hard(seq147=seqA, left=left, right=right, id=id, subid=subid)
+    else:
+        free_energy = nuc_breath.calculate_free_energy_soft(seq601=seqA, left=left, right=right, id=id, subid=subid)
     return [free_energy]
 
 if __name__ == "__main__":
@@ -50,6 +63,9 @@ if __name__ == "__main__":
     SLIDE_INTERVAL = TI_PARAMS['SLIDE_INTERVAL']
     MU_RANGE = TI_PARAMS['MU_RANGE']
     MU_VALUES = TI_PARAMS['MU_VALUES']
+    HARD_CONS = TI_PARAMS['HARD_CONS']
+
+
     results_all_batches:List[FreeEnergyResult]=[]
 
     if WHOLE_SEQ:
@@ -96,12 +112,16 @@ if __name__ == "__main__":
 
     # Create a DataFrame from the list of dictionaries
     results_df = pd.DataFrame(results_dict_list)
+    if HARD_CONS:
+        cons = "hard"
+    else:
+        cons = "soft"
 
 
     if WHOLE_SEQ:
-        results_df.to_csv(RESULTS_DIR / f'pklfiles/thdyinteg/fe_model_S288C_YAL002W-flanking1k_win{SEQ_LENGTH}_sl{SLIDE_INTERVAL}_mu{MU_RANGE[0]}-{MU_RANGE[1]}_n{MU_VALUES}.txt', index=False)
+        results_df.to_csv(RESULTS_DIR / f'pklfiles/thdyinteg/{cons}_fe_model_S288C_YAL002W-flanking1k_win{SEQ_LENGTH}_sl{SLIDE_INTERVAL}_mu{MU_RANGE[0]}-{MU_RANGE[1]}_n{MU_VALUES}.txt', index=False)
     else:
-        results_df.to_csv(RESULTS_DIR / f'pklfiles/thdyinteg/fe_model_S288C_YAL002W-TSS_win{SEQ_LENGTH}_sl{SLIDE_INTERVAL}_mu{MU_RANGE[0]}-{MU_RANGE[1]}_n{MU_VALUES}.txt', index=False)
+        results_df.to_csv(RESULTS_DIR / f'pklfiles/thdyinteg/{cons}_fe_model_S288C_YAL002W-TSS_win{SEQ_LENGTH}_sl{SLIDE_INTERVAL}_mu{MU_RANGE[0]}-{MU_RANGE[1]}_n{MU_VALUES}.txt', index=False)
 
 
 

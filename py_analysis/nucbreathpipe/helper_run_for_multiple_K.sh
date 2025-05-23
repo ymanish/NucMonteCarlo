@@ -15,11 +15,12 @@ fi
 
 
 K_VALUES=(0.1 0.5 1.0 2.0 5.0 10.0) ## These are scaling factors for the histone core softness. Large values mean a hard core, small values mean a softer core.
+# K_VALUES=(1.0)
 
 
 # Run 2 jobs in parallel (each uses 5 cores -> 2×5=10 < 11)
 parallel -j 2 --progress --bar --joblog $LOG_DIR/joblog.txt "conda run -n $CONDA_ENV && $PYTHON_PATH run_seqbatch_nucbreath.py {}" ::: "${K_VALUES[@]}"
-# parallel -j 1 --progress --bar --joblog joblog.txt "conda run -n $CONDA_ENV && $PYTHON_PATH ../tetramer_fe.py {}" ::: "${K_VALUES[@]}"
+# parallel -j 1 --progress --bar --joblog $LOG_DIR/joblog.txt "conda run -n $CONDA_ENV && $PYTHON_PATH ../tetramer_fe.py {}" ::: "${K_VALUES[@]}"
 
 
 

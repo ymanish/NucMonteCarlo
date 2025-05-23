@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+import seaborn as sns
 
 def plot_probability_heatmaps(
     df,
@@ -14,7 +15,7 @@ def plot_probability_heatmaps(
     vmin: float = None,
     vmax: float = None,
     figsize: tuple = None,      # e.g. (4*n_panels, 6)
-    sharex: bool = True,
+    sharex: bool = False,
     sharey: bool = False,
     constrained_layout: bool = True,
     dpi: int = 150,
@@ -157,5 +158,118 @@ def plot_probability_heatmaps(
 
     # overall title
     fig.suptitle(suptitle, fontsize=title_fontsize, y=1.02)
+
+    return fig, axs
+
+
+
+
+
+def plot_probability_heatmaps_rank(
+    df,
+    id_col: str = 'id',
+    x_col: str = 'left_open',
+    y_col: str = 'right_open',
+    value_col: str = 'df_exp_norm',
+    colormap: str = 'plasma_r',
+    vmin: float = None,
+    vmax: float = None,
+    figsize: tuple = None,
+    sharex: bool = False,
+    sharey: bool = False,
+    constrained_layout: bool = True,
+    dpi: int = 150,
+    xlabel: str = None,
+    ylabel: str = None,
+    colorbar_label: str = None,
+    suptitle: str = None,
+    title_fontsize: float = 14,
+    panel_title_fontsize: float = 12,
+    label_fontsize: float = 10,
+    tick_fontsize: float = 8,
+    xtick_rotation: float = 45
+):
+    """
+    Plot rank-based heatmaps using pure Matplotlib.
+    """
+    unique_ids = np.sort(df[id_col].unique())
+    n = len(unique_ids)
+
+    # Defaults
+    if figsize is None:
+        figsize = (4 * n, 6)
+    if xlabel is None:
+        xlabel = x_col
+    if ylabel is None:
+        ylabel = y_col
+    if colorbar_label is None:
+        colorbar_label = f'{value_col} (Rank-based)'
+    if suptitle is None:
+        suptitle = "Rank-based Probability Heatmaps Across IDs"
+
+      # Precompute all ranked values to determine global vmin/vmax
+    ranked_values = []
+    for id_val in unique_ids:
+        df_id = df[df[id_col] == id_val]
+        pivot = df_id.pivot(index=y_col, columns=x_col, values=value_col)
+        ranked = pivot.rank(ascending=False)
+        ranked_values.extend(ranked.values.ravel())
+    
+    global_vmin = np.nanmin(ranked_values) if vmin is None else vmin
+    global_vmax = np.nanmax(ranked_values) if vmax is None else vmax
+
+    fig, axs = plt.subplots(
+        1, n, figsize=figsize,
+        sharex=sharex, sharey=sharey,
+        constrained_layout=constrained_layout,
+        dpi=dpi
+    )
+    if n == 1:
+        axs = [axs]
+
+ 
+
+    for ax, id_val in zip(axs, unique_ids):
+        df_id = df[df[id_col] == id_val]
+        pivot = df_id.pivot(index=y_col, columns=x_col, values=value_col)
+
+        # Rank each cell: lower rank = higher original value
+        ranked = pivot.rank(ascending=False)
+        data = ranked.values
+        # print (ranked)
+        # Plot with imshow
+        im = ax.imshow(
+            data,
+            origin='lower',
+            aspect='auto',
+            cmap=colormap
+        )
+
+        # Set ticks and labels
+        ax.set_xticks(np.arange(pivot.shape[1]))
+        ax.set_xticklabels(pivot.columns, rotation=xtick_rotation,
+                           ha='right', fontsize=tick_fontsize)
+        ax.set_yticks(np.arange(pivot.shape[0]))
+        ax.set_yticklabels(pivot.index, fontsize=tick_fontsize)
+        ax.set_xlabel(xlabel, fontsize=label_fontsize)
+        ax.set_ylabel(ylabel, fontsize=label_fontsize)
+        ax.set_title(f"ID {id_val}", fontsize=panel_title_fontsize, pad=8)
+        # cbar = fig.colorbar(
+        #     im,
+        #     ax=ax,
+        #     orientation='vertical',
+        #     fraction=0.046,
+        #     pad=0.04
+        # )
+        # cbar.set_label(colorbar_label, fontsize=label_fontsize)
+
+    # Shared vertical colorbar
+    cbar = fig.colorbar(
+        im, ax=axs, orientation='vertical', fraction=0.02, pad=0.04
+    )
+    cbar.set_label(colorbar_label, fontsize=label_fontsize)
+
+    fig.suptitle(suptitle, fontsize=title_fontsize, y=1.02)
+    plt.show()
 
     return fig, axs

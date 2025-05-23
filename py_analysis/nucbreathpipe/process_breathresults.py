@@ -26,24 +26,16 @@ def process_results(results_all: List[NuclBreathingResult], params: Parameters) 
 
 def save_results(df_full: pd.DataFrame, params: Parameters, dir:str="nbfiles") -> None:
     if params.FOR_DNA_HISTONE:
-        subdir = "dna_histone"
+        subdir = "dna_histone" #### Use this for the ph_index: meaning for the phospahte level energies
     else:
-        subdir = "nucbreathfe"
+        subdir = "nucbreathfe" #### Use this for the b_index: meaning for the 14 binding level energies
 
-    if params.nucmethod == "hybrid":
-        method_str = "hybrid"
-    elif params.nucmethod == "crystal":
-        method_str = "crystal"
-    elif params.nucmethod == "md":
-        method_str = "md"
-    else:
-        raise ValueError(f"Unknown nucleosome method: {params.nucmethod}")
 
     if params.HARD_CONS:
-        filename = f"{method_str}_breathstatefe_K{params.KRESCFACTOR}_hc.csv"
+        filename = f"nuc_{params.nucmethod}_freedna_{params.freedna_method}_breathstatefe_K{params.KRESCFACTOR}_hc.csv"
     else:
         flip_str = "_flip" if params.FLIP_SEQUENCE else ""
-        filename = f"{method_str}_breathstatefe_K{params.KRESCFACTOR}_sc{flip_str}.csv"
+        filename = f"nuc_{params.nucmethod}_freedna_{params.freedna_method}_breathstatefe_K{params.KRESCFACTOR}_sc{flip_str}.csv"
 
 
     filepath = RESULTS_DIR / dir / subdir / filename

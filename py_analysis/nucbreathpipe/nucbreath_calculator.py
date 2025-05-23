@@ -1,16 +1,19 @@
 import sys
 from py_analysis.modules.NucFreeEnergy import NucleosomeBreath
 from py_analysis.config.custom_types import NuclBreathingResult
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 
 
-def BreathEnergies_per_sequence(key, seq, nucmethod:str, 
-                        bind_sates:List[Tuple[int, int]], 
-                        factor:float, hard:bool=False, 
-                        style:str="b_index",
-                        flip:bool=False)->  List[NuclBreathingResult]:
-    nucleosomebreath = NucleosomeBreath(nuc_method=nucmethod)
+def BreathEnergies_per_sequence(key, seq, 
+                                nucmethod:str, 
+                                bind_sates:List[Tuple[int, int]], 
+                                factor:float,
+                                hard:bool=False, 
+                                style:str="b_index",
+                                flip:bool=False, 
+                                freedna_method: Optional[str] = None)->  List[NuclBreathingResult]:
+    nucleosomebreath = NucleosomeBreath(nuc_method=nucmethod, free_dna_method=freedna_method)
     results:List[NuclBreathingResult] = []
     print(seq)
     if flip:

@@ -3,20 +3,17 @@
 from py_analysis.modules.NucFreeEnergy import NucleosomeBreath ## Needs to be import before numpy and numba because modules.NucFreeEnergy import env_settings 
 #which sets the global limit of multithreading for each process.
 
-import numpy as np
-import numba as nb
 import time
 import concurrent.futures
 from tqdm import tqdm
 from typing import List, Tuple
-import os
 import sys
 import pickle
 
 
 from py_analysis.config.custom_types import ProcessedSequence, FreeEnergyResult
 from py_analysis.config.seq_var import *
-from py_analysis.config.gen_var import *
+from py_analysis.config.gen_var import TETRAMER_PARAMS
 from py_analysis.config.io_path import ddGDataSaveParams, RESULTS_DIR
 
 def process_sequence_padding_and_sliding(seq:str, 
@@ -63,20 +60,33 @@ def energy_per_long_sequence(key, records, nucmethod:str, hard:bool=False, k_fac
 
         else:
             free_energy = nucleosomebreath.calculate_free_energy_soft(seq601=rec.sequence, 
-                                                                  left=tetramer_loc[0], right=tetramer_loc[1], id=key, subid=rec.subid,  kresc_factor=k_factor)
+                                                                  left=tetramer_loc[0], right=tetramer_loc[1], id=key, subid=rec.subid,  kresc_factor=k_factor, style="b_index")
         results.append(free_energy)
 
     return key, results
 
-# def cgnaplus_fn(seq):
-#     gs,stiff = cgnaplus_bps_params(seq,group_split=True)
-#     return gs,stiff
 
 if __name__ == "__main__":
   
     start = time.perf_counter()
 
     KRESCFACTOR = float(sys.argv[1])
+    NUC_PARAM_TYPE = TETRAMER_PARAMS['NUC_PARAM_TYPE']
+    HANG_PARAM_TYPE = TETRAMER_PARAMS['HANG_PARAM_TYPE']
+    TETRAMER_LENGTH = TETRAMER_PARAMS['TETRAMER_LENGTH']
+    NUC_LENGTH = TETRAMER_PARAMS['NUC_LENGTH']
+    PAD_CHAR = TETRAMER_PARAMS['PAD_CHAR']
+    BIND_POINTS = TETRAMER_PARAMS['BIND_POINTS']
+    HARD_CONS = TETRAMER_PARAMS['HARD_CONS']
+
+    print(f"Using KRESCFACTOR: {KRESCFACTOR}")
+    print(f"Using NUC_PARAM_TYPE: {NUC_PARAM_TYPE}")
+    print(f"Using HANG_PARAM_TYPE: {HANG_PARAM_TYPE}")
+    print(f"Using TETRAMER_LENGTH: {TETRAMER_LENGTH}")
+    print(f"Using NUC_LENGTH: {NUC_LENGTH}")
+    print(f"Using PAD_CHAR: {PAD_CHAR}")
+    print(f"Using BIND_POINTS: {BIND_POINTS}")
+    print(f"Using HARD_CONS: {HARD_CONS}")
 
     processed_sequences = {}
     for name, seq in sequence_dict.items():
@@ -130,7 +140,7 @@ if __name__ == "__main__":
 
             )
 
-    pkl_filepath = RESULTS_DIR / "pklfiles" / f"{file_cfg.ddG_filename(long_name=False)}.pkl"
+    pkl_filepath = RESULTS_DIR / "pklfiles/tetramernucfe" / f"{file_cfg.ddG_filename(long_name=False)}.pkl"
     with open(pkl_filepath, 'wb') as f:
         pickle.dump(results_all, f)
 

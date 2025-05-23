@@ -17,7 +17,7 @@ from typing import List
 import concurrent.futures
 from tqdm import tqdm
 import pandas as pd
-from py_analysis.config.breath_var import Parameters, seq_dict
+from py_analysis.config.breath_var import Parameters, seq_dict, MAX_WORKERS
 from breathstates_calculator import total_states_index, total_open_states
 from process_breathresults import process_results, save_results
 from py_analysis.config.custom_types import NuclBreathingResult
@@ -26,7 +26,7 @@ import argparse
 from pathlib import Path
 
 
-def slrum_job_fn():
+def slrum_job_fn(batch_save_dir_prefix:str):
     # Configure argument parser
     parser = argparse.ArgumentParser(
         description="Process nucleosome breathing states for a sequence batch for the SLURM cluster.",
@@ -41,7 +41,7 @@ def slrum_job_fn():
     parser.add_argument("--batch", type=int, required=True,
                        help="Batch/SLURM array task ID")
     parser.add_argument("--seq-file", type=Path, required=True,
-                       help="Path to sequence file")
+                       help="Path to sequence file, the file should be in the format: id\tsequence")
 
     args = parser.parse_args()
 
@@ -62,7 +62,6 @@ def slrum_job_fn():
     except FileNotFoundError:
         raise SystemExit(f"ERROR: Sequence file not found: {args.seq_file}")
 
-    # Validate indices against data
     if args.end > len(seq_df):
         raise ValueError(f"End index ({args.end}) exceeds total sequences ({len(seq_df)})")
 
@@ -70,8 +69,7 @@ def slrum_job_fn():
     batch_df = seq_df.iloc[args.start:args.end]
     seq_dict = dict(zip(batch_df['id'], batch_df['sequence']))
     
-    # Create output directory
-    save_dir = Path(f"gcseqs_breath_batch_{args.batch}")
+    save_dir = Path(f"{batch_save_dir_prefix}_{args.batch}")
         
     return seq_dict, save_dir, args.kresc
 
@@ -87,7 +85,7 @@ if __name__ == "__main__":
     ###########################################################
     ###########################################################
     
-    # seq_dict, SAVE_DIR_STR, kfact = slrum_job_fn()
+    # seq_dict, SAVE_DIR_STR, kfact = slrum_job_fn(batch_save_dir_prefix="gcseqs_breath_batch")
     # params = Parameters(KRESCFACTOR=float(kfact))
    
 
@@ -107,6 +105,7 @@ if __name__ == "__main__":
     # Print parameters for logging
     print(f"PARAMETERS...............")
     print(f"nucmethod: {params.nucmethod}")
+    print(f"Free DNA method: {params.freedna_method}")
     print(f"FOR DNA-HISTONE: {params.FOR_DNA_HISTONE}")
     print(f"Sequence Flipped: {params.FLIP_SEQUENCE}")
     print(f"Style: {params.STYLE}")
@@ -116,15 +115,15 @@ if __name__ == "__main__":
     print(f"Total states: {len(states)}")
     print(f"Total sequences: {len(seq_dict)}")
 
-    # Run parallel energy calculations
     results_all: List[NuclBreathingResult] = []
-    with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [
             executor.submit(
                 BreathEnergies_per_sequence,
                 key=s,
                 seq=seq_dict[s],
                 nucmethod=params.nucmethod,
+                freedna_method=params.freedna_method,
                 bind_sates=states,
                 factor=params.KRESCFACTOR,
                 hard=params.HARD_CONS,
